@@ -1,0 +1,6 @@
+/.idea
+/snippets
+/out
+.config
+*.log
+*.iml
