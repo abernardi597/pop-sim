@@ -3,7 +3,6 @@ package net.popsim.src.simu;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import net.popsim.src.fxui.Context;
 
@@ -50,11 +49,6 @@ public class Simulation implements EventHandler<KeyEvent> {
         }
         // Todo: Update here
         mWorld.update();
-    }
-
-    public void render() {
-        GraphicsContext gfx = mCanvas.getGraphicsContext2D();
-        mWorld.render(gfx);
     }
 
     @Override
