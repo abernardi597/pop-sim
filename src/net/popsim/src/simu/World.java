@@ -27,7 +27,8 @@ public class World {
         for (PeriodicScript script : mPeriodicScripts)
             script.init(this);
 
-        System.out.printf("World initialized [%dx%d]\n", getWidth(), getHeight());
+        System.out.printf("World initialized [%dx%d] ", getWidth(), getHeight());
+        System.out.printf("seed: %d\n", mContext.getRngSeed());
     }
 
     public void update() {
