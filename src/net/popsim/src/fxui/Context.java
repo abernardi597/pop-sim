@@ -2,7 +2,7 @@ package net.popsim.src.fxui;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.popsim.src.simu.Script;
+import net.popsim.src.simu.script.Script;
 import net.popsim.src.util.config.JsonConfigLoader;
 
 import java.io.File;

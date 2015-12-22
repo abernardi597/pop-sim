@@ -1,4 +1,4 @@
-package net.popsim.src.simu;
+package net.popsim.src.simu.script;
 
 import net.popsim.src.util.ScriptCompiler;
 
