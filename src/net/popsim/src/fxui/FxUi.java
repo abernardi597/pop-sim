@@ -36,7 +36,7 @@ public class FxUi extends Application {
         BorderPane pane = new BorderPane();
         pane.setCenter(mSimulation.getCanvas());
         Scene scene = new Scene(pane);
-        scene.setOnKeyTyped(mSimulation);
+        //scene.setOnKeyTyped(mSimulation);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

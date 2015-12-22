@@ -21,6 +21,8 @@ public class Simulation implements EventHandler<KeyEvent> {
         mContext = context;
         mWorld = new World(mContext);
         mCanvas = new Canvas(mWorld.getWidth(), mWorld.getHeight());
+        mCanvas.setOnKeyTyped(this);
+        mCanvas.setFocusTraversable(true);
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, r -> {
             Thread t = new Thread(r);
             t.setName("Tick Scheduler");
