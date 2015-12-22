@@ -47,6 +47,8 @@ public class Context implements JsonConfigLoader.Target {
         HashMap<String, Script> sMap = new HashMap<>(mScriptInfoMap.size());
         for (Map.Entry<String, String> e : mScriptInfoMap.entrySet()) {
             String name = e.getKey();
+            if (sMap.containsKey(name))
+                throw new Exception("Duplicate script name: " + name);
             Script script = Script.compile(name, new File(ContextHelper.DIR_HOME, e.getValue()));
             sMap.put(name, script);
         }
@@ -69,23 +71,18 @@ public class Context implements JsonConfigLoader.Target {
         return mWorldSize[1];
     }
 
-    public Script getScript(String name) {
-        return mScriptMap.get(name);
-    }
-
-    public <T extends Script> T getScript(String name, Class<T> type) {
-        Script s = mScriptMap.get(name);
-        if (s == null || !type.isInstance(s))
-            return null;
-        else return type.cast(s);
-    }
-
-    public <T extends Script> List<T> getScripts(Class<T> type) {
+    @SuppressWarnings("unchecked")
+    public <T extends Script> List<T> getScripts(Class<? extends T> type, String... names) {
         ArrayList<T> result = new ArrayList<>();
-        mScriptMap.forEach((key, value) -> {
-            if (type.isInstance(value))
-                result.add(type.cast(value));
-        });
+        List<String> toCheck;
+        if (names.length > 0)
+            toCheck = Arrays.asList(names);
+        else toCheck = new ArrayList<>(mScriptMap.keySet());
+        for (String name : toCheck) {
+            Script s = mScriptMap.get(name);
+            if (s != null && type.isInstance(s))
+                result.add((T) s);
+        }
         return result;
     }
 }
