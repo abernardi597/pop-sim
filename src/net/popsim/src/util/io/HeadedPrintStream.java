@@ -1,9 +1,8 @@
-package net.popsim.src.internal.io;
+package net.popsim.src.util.io;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class HeadedPrintStream extends PrintStream {
 
@@ -18,13 +17,9 @@ public class HeadedPrintStream extends PrintStream {
      */
     private static final String HEADER_TIME = "[%1$tH:%1$tM:%1$tS:%1$tL] ";
     /**
-     * Header format for the current thread ID.
+     * Header format for new threads.
      */
-    private static final String HEADER_THREAD = "(%4d)  ";
-    /**
-     * Header format for the
-     */
-    private static final String HEADER_THREAD_NEW = "(%4d) %s";
+    private static final String HEADER_THREAD_NEW = "%s (%d)";
     /**
      * The number of milliseconds in a day. This is used to calculate when a day passes and the day header should be
      * reprinted.
@@ -35,11 +30,12 @@ public class HeadedPrintStream extends PrintStream {
      * A flag used when checking if a header must be written. This allows us to "inject" a header before a line is written.
      */
     private boolean mNeedsHeader;
+
     /**
-     * A map used to track which Threads have used this object. When a Thread prints with this stream for the first time,
-     * a special message is printed to show the thread name with its ID.
+     * The name of the last Thread to print to this stream. When a different Thread prints, a nifty header is printed.
      */
-    private HashMap<Long, String> mThreadMap;
+    private String mLastThread;
+
     /**
      * Days since the epoch. Used to keep track of when day headers should be printed.
      */
@@ -51,7 +47,6 @@ public class HeadedPrintStream extends PrintStream {
     public HeadedPrintStream(OutputStream out, boolean autoFlush) {
         super(out, autoFlush);
         mNeedsHeader = true;
-        mThreadMap = new HashMap<>();
     }
 
     // Overridden to make sure we catch newlines
@@ -97,18 +92,18 @@ public class HeadedPrintStream extends PrintStream {
         printf(HEADER_TIME, t);
         // Get the current thread and its ID
         Thread current = Thread.currentThread();
+        String name = current.getName();
         long id = current.getId();
-        String s = mThreadMap.get(id);
         // If the map doesn't contain the id or the names do not match
-        if (s == null || !s.equals(current.getName())) {
-            // Add it/Update the map
-            mThreadMap.put(id, s = current.getName());
+        if (!name.equals(mLastThread)) {
+            // Update the last thread
+            mLastThread = name;
             // Print that a new thread has printed
-            printf(HEADER_THREAD_NEW, id, s);
+            printf(HEADER_THREAD_NEW, name, id);
             println();
             // Rewrite the header so we can have a normal line
             writeHeader();
         }
-        else printf(HEADER_THREAD, id); // Everything was normal, so we just print the normal thread header
+        else print("  ");
     }
 }

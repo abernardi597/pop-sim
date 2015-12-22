@@ -1,15 +1,14 @@
-package net.popsim.src.internal;
+package net.popsim.src.util;
 
 import javax.tools.*;
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 
 /**
  * Class containing methods for compiling Java source at runtime.
  */
-public class SnippetCompiler {
+public class ScriptCompiler {
 
     /**
      * The system's compiler.
@@ -22,13 +21,6 @@ public class SnippetCompiler {
      */
     private static File DIR_OUTPUT;
     /**
-     * The directory to store compiled snippets. Namely, "DIR_OUTPUT/net/june/src/snippets".
-     *
-     * @see #DIR_OUTPUT
-     */
-    private static File DIR_CLASSES;
-
-    /**
      * Assigns values to static fields and initializes the working directories.
      *
      * @throws Exception if something goes wrong (No java compiler, or File exceptions)
@@ -38,16 +30,8 @@ public class SnippetCompiler {
         COMPILER = ToolProvider.getSystemJavaCompiler();
         if (COMPILER == null)
             throw new Exception("No Java compiler on system");
-        //Find output directories
-        DIR_OUTPUT = new File(SnippetCompiler.class.getProtectionDomain().getCodeSource().getLocation().getFile().replace("%20", " "));
-        DIR_CLASSES = new File(DIR_OUTPUT, "net/popsim/src/snippets");
-        //Delete if it already exists
-        if (DIR_CLASSES.exists())
-            deleteAll(DIR_CLASSES);
-        else if (!DIR_CLASSES.mkdir())
-            throw new IOException("Unable to create snippet compilation directory: " + DIR_CLASSES);
-        //Make sure the directory is cleaned after runtime, so that it is fresh for another run
-        DIR_CLASSES.deleteOnExit();
+        //Find output directory
+        DIR_OUTPUT = new File(ScriptCompiler.class.getProtectionDomain().getCodeSource().getLocation().getFile().replace("%20", " "));
     }
 
     /**
@@ -60,11 +44,17 @@ public class SnippetCompiler {
      * @throws Exception if there was a compilation error, an error finding the class
      */
     public static Class compileClass(String name, String src) throws Exception {
-        File destination = new File(DIR_CLASSES, name + ".class");
+        //Find package declaration
+        String pack = src.substring(8, src.indexOf(';'));
+        // Make it into a relative path
+        File outputDir = new File(DIR_OUTPUT, pack.replaceAll("\\.", File.separator));
+        if (!outputDir.exists() && !outputDir.mkdirs())
+            throw new IOException("Unable to create compilation output directory " + outputDir);
+        outputDir.deleteOnExit();
+        // Predict the compiled file
+        File destination = new File(outputDir, name + ".class");
         if (destination.exists()) //Check if destination already exists
             throw new Exception("File already exists: " + destination);
-        //Prepend package declaration
-        src = "package net.popsim.src.snippets;\n" + src;
         //Create classpath
         StringBuilder cp = new StringBuilder();
         for (URL url : ((URLClassLoader) Thread.currentThread().getContextClassLoader()).getURLs())
@@ -82,7 +72,7 @@ public class SnippetCompiler {
         //Mark new file for deletion when runtime terminates to keep directory clean
         destination.deleteOnExit();
         //Find the class and return it
-        return Class.forName("net.popsim.src.snippets." + name);
+        return Class.forName(pack + "." + name);
     }
 
     public static String sourceFor(File file) throws FileNotFoundException {
@@ -91,40 +81,6 @@ public class SnippetCompiler {
         while (scanner.hasNextLine())
             sb.append(scanner.nextLine()).append("\n");
         return sb.toString();
-    }
-
-    /**
-     * Recursively deletes everything in the given directory. Does not delete the directory itself.
-     *
-     * @param dir the directory to purge
-     */
-    private static void deleteAll(File dir) {
-        File[] subs = dir.listFiles();
-        if (subs != null)
-            for (File sub : subs) {
-                if (sub.isDirectory())
-                    deleteAll(sub);
-                sub.delete();
-            }
-    }
-
-    /**
-     * Checks if the given arguments can be used to satisfy the parameters of a given method
-     *
-     * @param m    the method to check
-     * @param args the arguments to check
-     *
-     * @return True if the method can be invoked with the arguments, false otherwise
-     */
-    private static boolean argsApplicable(Method m, Object[] args) {
-        Class[] argClasses = m.getParameterTypes();
-        if (argClasses.length == args.length) {
-            for (int i = 0; i < args.length; i++)
-                if (!argClasses[i].isInstance(args[i]))
-                    return false;
-            return true;
-        }
-        else return false;
     }
 
     /**

@@ -1,9 +1,15 @@
-package net.popsim.src.internal;
+package net.popsim.src.util;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * A 2D Vector with double precision.
  */
 public class Vector implements Cloneable {
+
+    public static final String X = "X";
+    public static final String Y = "Y";
 
     /**
      * Constructs a Vector using polar coordinates.
@@ -20,10 +26,14 @@ public class Vector implements Cloneable {
     /**
      * X component of the vector.
      */
+    @Expose
+    @SerializedName(X)
     public double mX;
     /**
      * Y component of the vector.
      */
+    @Expose
+    @SerializedName(Y)
     public double mY;
 
     /**

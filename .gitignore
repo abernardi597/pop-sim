@@ -1,6 +1,7 @@
 /.idea
 /snippets
+/log
 /out
-.config
-*.log
+/scripts
+*.config
 *.iml

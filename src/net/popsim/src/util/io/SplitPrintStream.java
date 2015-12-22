@@ -1,4 +1,4 @@
-package net.popsim.src.internal.io;
+package net.popsim.src.util.io;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
