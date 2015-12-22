@@ -14,6 +14,8 @@ public class World {
     private final List<PeriodicScript> mPeriodicScripts;
     private final TickSchedule mScriptSchedule;
 
+    private long mTicks;
+
     public World(Context context) {
         mContext = context;
         mRng = new Random(mContext.getRngSeed());
@@ -30,6 +32,7 @@ public class World {
 
     public void update() {
         mScriptSchedule.tick();
+        mTicks++;
     }
 
     public void render(GraphicsContext gfx) {
@@ -51,5 +54,9 @@ public class World {
 
     public int getHeight() {
         return mContext.getWorldHeight();
+    }
+
+    public long getTicks() {
+        return mTicks;
     }
 }
