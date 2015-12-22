@@ -45,7 +45,6 @@ public class Context implements JsonConfigLoader.Target {
             throw new Exception("World dimensions should be two dimensional");
         // Script Map
         HashMap<String, Script> sMap = new HashMap<>(mScriptInfoMap.size());
-        ArrayList<String> pScripts = new ArrayList<>();
         for (Map.Entry<String, String> e : mScriptInfoMap.entrySet()) {
             String name = e.getKey();
             Script script = Script.compile(name, new File(ContextHelper.DIR_HOME, e.getValue()));
@@ -72,6 +71,13 @@ public class Context implements JsonConfigLoader.Target {
 
     public Script getScript(String name) {
         return mScriptMap.get(name);
+    }
+
+    public <T extends Script> T getScript(String name, Class<T> type) {
+        Script s = mScriptMap.get(name);
+        if (s == null || !type.isInstance(s))
+            return null;
+        else return type.cast(s);
     }
 
     public <T extends Script> List<T> getScripts(Class<T> type) {
