@@ -6,20 +6,19 @@ import net.popsim.src.util.io.HeadedPrintStream;
 import net.popsim.src.util.io.SplitPrintStream;
 
 import java.io.*;
+import java.util.*;
 
 public class ContextHelper {
 
+    private static final JsonConfigLoader CONFIG_LOADER = new JsonConfigLoader(Context.class);
     /**
      * The working directory at runtime.
      */
     public static final File DIR_HOME = new File("").getAbsoluteFile();
-
     /**
      * The name of this application.
      */
     public static final String APP_NAME = "PopSim";
-
-    private static final JsonConfigLoader CONFIG_LOADER = new JsonConfigLoader(Context.class);
 
     public static void setupOutput() throws Exception {
         //Set up our standard out and err wrapper streams. These catch output and sneak a header in, as well as write it to a file.
@@ -95,5 +94,20 @@ public class ContextHelper {
         } catch (NumberFormatException e) {
             return seed.hashCode();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V, A extends V> List<A> findInMap(Map<K, V> map, Class<A> type, K[] keys) {
+        ArrayList<A> result = new ArrayList<>();
+        List<K> toCheck;
+        if (keys.length > 0)
+            toCheck = Arrays.asList(keys);
+        else toCheck = new ArrayList<>(map.keySet());
+        for (K key : toCheck) {
+            V value = map.get(key);
+            if (value != null && type.isInstance(value))
+                result.add((A) value);
+        }
+        return result;
     }
 }

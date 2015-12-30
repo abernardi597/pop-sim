@@ -4,6 +4,7 @@ import javax.tools.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Matcher;
 
 /**
  * Class containing methods for compiling Java source at runtime.
@@ -47,7 +48,7 @@ public class ScriptCompiler {
         //Find package declaration
         String pack = src.substring(8, src.indexOf(';'));
         // Make it into a relative path
-        File outputDir = new File(DIR_OUTPUT, pack.replaceAll("\\.", File.separator));
+        File outputDir = new File(DIR_OUTPUT, pack.replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
         if (!outputDir.exists() && !outputDir.mkdirs())
             throw new IOException("Unable to create compilation output directory " + outputDir);
         outputDir.deleteOnExit();
