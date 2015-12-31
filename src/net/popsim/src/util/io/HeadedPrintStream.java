@@ -51,25 +51,6 @@ public class HeadedPrintStream extends PrintStream {
 
     // Overridden to make sure we catch newlines
 
-    public void write(int b) {
-        super.write(b);
-        mNeedsHeader = b == '\n';
-    }
-
-    @Override
-    public void write(byte[] buf, int off, int len) {
-        // Inject header
-        if (mNeedsHeader) {
-            buf = Arrays.copyOfRange(buf, off, len);
-            off = 0;
-            writeHeader();
-        }
-        // Write the original stuff
-        super.write(buf, off, len);
-        // Buffers with new lines typically end with them...
-        mNeedsHeader = len > 0 && buf[off + len - 1] == '\n';
-    }
-
     /**
      * Prints the header.
      */
@@ -103,7 +84,25 @@ public class HeadedPrintStream extends PrintStream {
             println();
             // Rewrite the header so we can have a normal line
             writeHeader();
+        } else print("  ");
+    }
+
+    public void write(int b) {
+        super.write(b);
+        mNeedsHeader = b == '\n';
+    }
+
+    @Override
+    public void write(byte[] buf, int off, int len) {
+        // Inject header
+        if (mNeedsHeader) {
+            buf = Arrays.copyOfRange(buf, off, len);
+            off = 0;
+            writeHeader();
         }
-        else print("  ");
+        // Write the original stuff
+        super.write(buf, off, len);
+        // Buffers with new lines typically end with them...
+        mNeedsHeader = len > 0 && buf[off + len - 1] == '\n';
     }
 }

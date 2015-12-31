@@ -13,6 +13,7 @@ public class FxUi extends Application {
     public static void main(String[] args) {
         FxPreload.launch(args);
     }
+
     private Context mContext;
     private Simulation mSimulation;
     protected File mConfigFile;

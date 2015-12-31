@@ -21,6 +21,7 @@ public class ScriptCompiler {
      * The directory where the compiled classes reside.
      */
     private static File DIR_OUTPUT;
+
     /**
      * Assigns values to static fields and initializes the working directories.
      *
