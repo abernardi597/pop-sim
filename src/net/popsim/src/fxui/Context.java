@@ -2,17 +2,20 @@ package net.popsim.src.fxui;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import net.popsim.src.simu.Entity;
 import net.popsim.src.simu.script.Script;
 import net.popsim.src.util.config.JsonConfigLoader;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Context implements JsonConfigLoader.Target {
 
     @Expose
-    @SerializedName("Update interval")
-    private long mTick;
+    @SerializedName("Update frequency")
+    private long mTickFrequency;
+    private long mTickInterval;
 
     @Expose
     @SerializedName("Random seed")
@@ -28,16 +31,23 @@ public class Context implements JsonConfigLoader.Target {
     private Map<String, String> mScriptInfoMap;
     private Map<String, Script> mScriptMap;
 
+    @Expose
+    @SerializedName("Entity types")
+    private Map<String, Entity.Type> mEntityTypes;
+
     public Context() {
         // Default values
-        mTick = 16; // 60 fps
+        mTickFrequency = 60; // 60 Hz
         mRandomSeedString = "";
         mWorldSize = new int[] {100, 100};
         mScriptInfoMap = new HashMap<>();
+        mEntityTypes = new HashMap<>();
     }
 
     @Override
     public void postLoad() throws Exception {
+        // Tick frequency
+        mTickInterval = TimeUnit.SECONDS.toNanos(1) / mTickFrequency;
         // Random seed
         mRngSeed = ContextHelper.parseSeed(mRandomSeedString);
         // World dimensions
@@ -53,10 +63,17 @@ public class Context implements JsonConfigLoader.Target {
             sMap.put(name, script);
         }
         mScriptMap = Collections.unmodifiableMap(sMap);
+        // Entity types
+        for (Map.Entry<String, Entity.Type> entry : mEntityTypes.entrySet())
+            entry.getValue().postLoad(this, entry.getKey());
     }
 
-    public long getTick() {
-        return mTick;
+    public long getTickFrequency() {
+        return mTickFrequency;
+    }
+
+    public long getTickInterval() {
+        return mTickInterval;
     }
 
     public long getRngSeed() {
@@ -73,5 +90,9 @@ public class Context implements JsonConfigLoader.Target {
 
     public <T extends Script> List<T> getScripts(Class<T> type, String... names) {
         return ContextHelper.findInMap(mScriptMap, type, names);
+    }
+
+    public List<Entity.Type> getEntityTypes(String... names) {
+        return ContextHelper.findInMap(mEntityTypes, Entity.Type.class, names);
     }
 }

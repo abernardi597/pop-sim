@@ -13,11 +13,9 @@ public class FxUi extends Application {
     public static void main(String[] args) {
         FxPreload.launch(args);
     }
-
-    protected File mConfigFile;
-
     private Context mContext;
     private Simulation mSimulation;
+    protected File mConfigFile;
 
     @Override
     public void init() throws Exception {
@@ -36,9 +34,9 @@ public class FxUi extends Application {
         BorderPane pane = new BorderPane();
         pane.setCenter(mSimulation.getCanvas());
         Scene scene = new Scene(pane);
-        //scene.setOnKeyTyped(mSimulation);
         primaryStage.setScene(scene);
         primaryStage.show();
+        mSimulation.begin();
     }
 
     @Override

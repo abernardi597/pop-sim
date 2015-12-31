@@ -54,7 +54,7 @@ public class ScriptCompiler {
         outputDir.deleteOnExit();
         // Predict the compiled file
         File destination = new File(outputDir, name + ".class");
-        if (destination.exists()) //Check if destination already exists
+        if (destination.exists() && !destination.delete()) //Check if destination already exists, and try to delete it
             throw new Exception("File already exists: " + destination);
         //Create classpath
         StringBuilder cp = new StringBuilder();

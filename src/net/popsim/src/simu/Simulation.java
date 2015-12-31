@@ -16,6 +16,7 @@ public class Simulation implements EventHandler<KeyEvent> {
     private final ScheduledExecutorService mTickScheduler;
 
     private ScheduledFuture mFutureTick;
+    private boolean hasBegun;
 
     public Simulation(Context context) {
         mContext = context;
@@ -37,20 +38,25 @@ public class Simulation implements EventHandler<KeyEvent> {
     }
 
     public void tick() {
-        CountDownLatch updateLatch = new CountDownLatch(1);
+        // Get the world ready for an update
+        mWorld.preUpdate();
+        CountDownLatch finalizeLatch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            // Todo: Try to use "current" positions and future positions to update and render simultaneously.
             mWorld.render(mCanvas.getGraphicsContext2D());
-            updateLatch.countDown();
+            // Let the update finalize
+            finalizeLatch.countDown();
         });
-        try { // Wait for the render to be complete before we jump into the next update
-            updateLatch.await();
+        // Update while rendering
+        mWorld.update();
+        try {
+            // Wait for the render to be complete before we finalize the update
+            finalizeLatch.await();
         } catch (InterruptedException e) {
             System.err.println("Interrupted: tossing update tick");
             return;
         }
-        // Todo: Update here
-        mWorld.update();
+        // Finalize the update, setting current positions to future ones
+        mWorld.postUpdate();
     }
 
     @Override
@@ -66,8 +72,19 @@ public class Simulation implements EventHandler<KeyEvent> {
         }
     }
 
+    public void begin() {
+        if (hasBegun) {
+            System.err.println("Simulation has already begun");
+            return;
+        }
+        hasBegun = true;
+        System.out.printf("Beginning simulation @ %dHz\n", mContext.getTickFrequency());
+        mWorld.init();
+        //resume();
+    }
+
     public void resume() {
-        mFutureTick = mTickScheduler.scheduleAtFixedRate(this::tick, 0, mContext.getTick(), TimeUnit.MILLISECONDS);
+        mFutureTick = mTickScheduler.scheduleAtFixedRate(this::tick, 0, mContext.getTickInterval(), TimeUnit.NANOSECONDS);
     }
 
     public void pause() {

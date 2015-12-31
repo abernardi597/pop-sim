@@ -13,4 +13,13 @@ public interface ReadableData {
      * If a value is found, but is of a different type, a ClassCastException will be thrown.
      */
     <T> T get(String key, T def);
+
+    /**
+     * Checks if a key exists in the data.
+     *
+     * @param key the key to look up
+     *
+     * @return True if there is a value associated with the given key, false otherwise.
+     */
+    boolean containsKey(String key);
 }
