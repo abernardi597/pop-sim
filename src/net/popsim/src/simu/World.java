@@ -2,7 +2,7 @@ package net.popsim.src.simu;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import net.popsim.src.fxui.Context;
+import net.popsim.src.fx.ui.Context;
 import net.popsim.src.simu.script.PeriodicScript;
 import net.popsim.src.util.TickSchedule;
 import net.popsim.src.util.Vector;

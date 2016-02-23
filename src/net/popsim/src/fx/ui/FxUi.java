@@ -1,4 +1,4 @@
-package net.popsim.src.fxui;
+package net.popsim.src.fx.ui;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -10,13 +10,9 @@ import java.io.File;
 
 public class FxUi extends Application {
 
-    public static void main(String[] args) {
-        FxPreload.launch(args);
-    }
-
+    protected File mConfigFile;
     private Context mContext;
     private Simulation mSimulation;
-    protected File mConfigFile;
 
     @Override
     public void init() throws Exception {

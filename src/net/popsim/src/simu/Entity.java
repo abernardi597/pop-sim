@@ -3,7 +3,7 @@ package net.popsim.src.simu;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import javafx.scene.canvas.GraphicsContext;
-import net.popsim.src.fxui.Context;
+import net.popsim.src.fx.ui.Context;
 import net.popsim.src.simu.script.BehaviorScript;
 import net.popsim.src.simu.script.RenderScript;
 import net.popsim.src.util.TickSchedule;
@@ -19,7 +19,7 @@ public class Entity {
     private final Random mRng;
 
     private final Data mData;
-    private final Vector mPosition, mFuture;
+    private final Vector mLast, mPosition, mFuture;
     private final TickSchedule mBehaviorSchedule, mRenderSchedule;
 
     public Entity(Type type, World world) {
@@ -29,6 +29,7 @@ public class Entity {
 
         mData = new Data(mType.mInitialData);
 
+        mLast = new Vector();
         mPosition = new Vector();
         mFuture = new Vector();
 
@@ -77,6 +78,7 @@ public class Entity {
     }
 
     public void setPosition(double x, double y) {
+        mLast.set(x, y);
         mPosition.set(x, y);
         mFuture.set(x, y);
     }
@@ -95,6 +97,10 @@ public class Entity {
 
     public Vector getPosition() {
         return mPosition;
+    }
+
+    public Vector getLastPosition() {
+        return mLast;
     }
 
     public static class Type {

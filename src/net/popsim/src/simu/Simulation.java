@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
-import net.popsim.src.fxui.Context;
+import net.popsim.src.fx.ui.Context;
 
 import java.util.concurrent.*;
 
@@ -80,7 +80,7 @@ public class Simulation implements EventHandler<KeyEvent> {
         hasBegun = true;
         System.out.printf("Beginning simulation @ %dHz\n", mContext.getTickFrequency());
         mWorld.init();
-        //resume();
+        resume();
     }
 
     public void resume() {

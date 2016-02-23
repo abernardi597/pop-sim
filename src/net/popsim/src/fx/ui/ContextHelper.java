@@ -1,4 +1,4 @@
-package net.popsim.src.fxui;
+package net.popsim.src.fx.ui;
 
 import net.popsim.src.util.ScriptCompiler;
 import net.popsim.src.util.config.JsonConfigLoader;
@@ -10,7 +10,6 @@ import java.util.*;
 
 public class ContextHelper {
 
-    private static final JsonConfigLoader CONFIG_LOADER = new JsonConfigLoader(Context.class);
     /**
      * The working directory at runtime.
      */
@@ -19,6 +18,7 @@ public class ContextHelper {
      * The name of this application.
      */
     public static final String APP_NAME = "PopSim";
+    private static final JsonConfigLoader CONFIG_LOADER = new JsonConfigLoader(Context.class);
 
     public static void setupOutput() throws Exception {
         //Set up our standard out and err wrapper streams. These catch output and sneak a header in, as well as write it to a file.

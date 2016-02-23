@@ -34,6 +34,8 @@ public class ScriptCompiler {
             throw new Exception("No Java compiler on system");
         //Find output directory
         DIR_OUTPUT = new File(ScriptCompiler.class.getProtectionDomain().getCodeSource().getLocation().getFile().replace("%20", " "));
+        if (!DIR_OUTPUT.exists() && !DIR_OUTPUT.mkdirs())
+            throw new Exception("Output directory inaccessible");
     }
 
     /**

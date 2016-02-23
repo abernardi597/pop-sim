@@ -1,5 +1,4 @@
-indie-study-june
-================
+PopSim
+======
 
-My independent study with Dr. Shenk for my junior and senior years (2014-16) at AAE
-Requires google-gson-2.2
+A highly flexible population simulation framework.

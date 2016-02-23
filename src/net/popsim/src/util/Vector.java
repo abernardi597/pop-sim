@@ -67,6 +67,10 @@ public class Vector implements Cloneable {
         return this;
     }
 
+    public Vector set(Vector other) {
+        return set(other.mX, other.mY);
+    }
+
     /**
      * Adds this Vector and another Vector, storing the result in a third Vector.
      *

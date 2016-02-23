@@ -1,4 +1,4 @@
-package net.popsim.src.fxui;
+package net.popsim.src.fx.ui;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
