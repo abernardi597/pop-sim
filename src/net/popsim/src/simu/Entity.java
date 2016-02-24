@@ -1,142 +1,25 @@
 package net.popsim.src.simu;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import javafx.scene.canvas.GraphicsContext;
 import net.popsim.src.fx.ui.Context;
-import net.popsim.src.simu.script.BehaviorScript;
-import net.popsim.src.simu.script.RenderScript;
-import net.popsim.src.util.TickSchedule;
-import net.popsim.src.util.Vector;
-import net.popsim.src.util.config.Data;
 
-import java.util.*;
+import java.util.Random;
 
-public class Entity {
+public abstract class Entity {
 
-    private final Type mType;
-    private final World mWorld;
-    private final Random mRng;
+    protected final Context mContext;
+    protected final World mWorld;
+    protected final Random mRng;
 
-    private final Data mData;
-    private final Vector mLast, mPosition, mFuture;
-    private final TickSchedule mBehaviorSchedule, mRenderSchedule;
-
-    public Entity(Type type, World world) {
-        mType = type;
+    public Entity(World world) {
+        mContext = world.getContext();
         mWorld = world;
-        mRng = new Random(mWorld.getNewRandomSeed());
-
-        mData = new Data(mType.mInitialData);
-
-        mLast = new Vector();
-        mPosition = new Vector();
-        mFuture = new Vector();
-
-        mBehaviorSchedule = new TickSchedule(mType.mBehaviorScripts.size(), (index, args) ->
-                mType.mBehaviorScripts.get(index).behave(mWorld, this, mData));
-        mRenderSchedule = new TickSchedule(mType.mRenderScripts.size(), (index, args) ->
-                mType.mRenderScripts.get(index).render(mWorld, this, mData, (GraphicsContext) args[0]));
+        mRng = new Random(world.getNewRandomSeed());
     }
 
-    public Entity init() {
-        for (BehaviorScript script : mType.mBehaviorScripts)
-            script.init(mWorld, this, mData);
-        for (RenderScript script : mType.mRenderScripts)
-            script.init(mWorld, this, mData);
-        return this;
-    }
+    public abstract void update();
 
-    public void render(GraphicsContext gfx) {
-        mRenderSchedule.tick(gfx);
-    }
+    public abstract void finish();
 
-    public void update() {
-        mBehaviorSchedule.tick();
-    }
-
-    public void finalizeUpdate() {
-        for (BehaviorScript script : mType.mBehaviorScripts)
-            script.finalize(mWorld, this, mData);
-        mPosition.set(mFuture.mX, mFuture.mY);
-    }
-
-    public void scheduleBehavior(BehaviorScript script, long delay) {
-        mBehaviorSchedule.schedule(mType.mBehaviorScripts.indexOf(script), delay);
-    }
-
-    public void scheduleRender(RenderScript script, long delay) {
-        mRenderSchedule.schedule(mType.mRenderScripts.indexOf(script), delay);
-    }
-
-    public Type getType() {
-        return mType;
-    }
-
-    public Random getRng() {
-        return mRng;
-    }
-
-    public void setPosition(double x, double y) {
-        mLast.set(x, y);
-        mPosition.set(x, y);
-        mFuture.set(x, y);
-    }
-
-    public double getXPosition() {
-        return mPosition.mX;
-    }
-
-    public double getYPosition() {
-        return mPosition.mY;
-    }
-
-    public Vector getFuturePosition() {
-        return mFuture;
-    }
-
-    public Vector getPosition() {
-        return mPosition;
-    }
-
-    public Vector getLastPosition() {
-        return mLast;
-    }
-
-    public static class Type {
-
-        @Expose
-        @SerializedName("Behavior scripts")
-        private String[] mBehaviorScriptInfo;
-        private List<BehaviorScript> mBehaviorScripts;
-
-        @Expose
-        @SerializedName("Render scripts")
-        private String[] mRenderScriptInfo;
-        private List<RenderScript> mRenderScripts;
-
-        @Expose
-        @SerializedName("Data")
-        private Map<String, Object> mInitialData;
-
-        private String mName;
-
-        public Type() {
-            mBehaviorScriptInfo = new String[0];
-            mRenderScriptInfo = new String[0];
-            mInitialData = new HashMap<>();
-            mName = "";
-        }
-
-        public void postLoad(Context context, String key) throws Exception {
-            mBehaviorScripts = Collections.unmodifiableList(context.getScripts(BehaviorScript.class, mBehaviorScriptInfo));
-            mRenderScripts = Collections.unmodifiableList(context.getScripts(RenderScript.class, mRenderScriptInfo));
-            mInitialData = Collections.unmodifiableMap(mInitialData);
-            mName = key;
-        }
-
-        public String getName() {
-            return mName;
-        }
-    }
+    public abstract void render(GraphicsContext gfx);
 }
