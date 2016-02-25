@@ -10,7 +10,6 @@ public class Compiler {
 
     private static JavaCompiler COMPILER;
     private static File DIR_OUTPUT;
-    private static ArrayList<JavaFileObject> TASK_LIST;
 
     public static void makeTempDirs(File f) throws IOException {
         Stack<File> toMake = new Stack<>();
@@ -33,7 +32,6 @@ public class Compiler {
         DIR_OUTPUT = new File(Compiler.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         if (!DIR_OUTPUT.exists() && !DIR_OUTPUT.mkdirs())
             throw new Exception("Output directory inaccessible");
-        TASK_LIST = new ArrayList<>();
     }
 
     public static File getOutputDir() {
@@ -41,6 +39,10 @@ public class Compiler {
     }
 
     public static void compile(FileSource... sources) throws Exception {
+        compile(Arrays.asList(sources));
+    }
+
+    public static void compile(List<FileSource> sources) throws Exception {
         // Prepare each file for compilation
         for (FileSource src : sources) {
             File dest = src.getCompiledLocation(DIR_OUTPUT);
@@ -65,8 +67,8 @@ public class Compiler {
         args.add(cp.toString());
         // Output for compiler
         StringWriter out = new StringWriter();
-        if (!COMPILER.getTask(out, null, null, args, null, Arrays.asList(sources)).call())
-            throw new Exception(String.format("Unable to compile classes: %s\n%s", Arrays.toString(sources), out.toString().trim()));
+        if (!COMPILER.getTask(out, null, null, args, null, sources).call())
+            throw new Exception(String.format("Unable to compile classes: %s\n%s", sources, out.toString().trim()));
         // Cleanup after runtime terminates
         for (FileSource src : sources)
             src.getCompiledLocation(DIR_OUTPUT).deleteOnExit();

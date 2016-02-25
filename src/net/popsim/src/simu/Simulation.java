@@ -18,9 +18,9 @@ public class Simulation implements EventHandler<KeyEvent> {
     private ScheduledFuture mFutureTick;
     private boolean hasBegun;
 
-    public Simulation(Context context) {
+    public Simulation(Context context) throws Exception {
         mContext = context;
-        mWorld = new World(mContext);
+        mWorld = mContext.getWorldClass().getConstructor(Context.class).newInstance(mContext);
         mCanvas = new Canvas(mWorld.getWidth(), mWorld.getHeight());
         mCanvas.setOnKeyTyped(this);
         mCanvas.setFocusTraversable(true);

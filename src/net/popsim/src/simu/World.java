@@ -1,7 +1,6 @@
 package net.popsim.src.simu;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import net.popsim.src.fx.ui.Context;
 
 import java.util.ArrayList;
@@ -9,16 +8,15 @@ import java.util.Random;
 
 public class World {
 
-    private final Context mContext;
-    private final Random mRng;
-    private final ArrayList<Entity> mEntities;
+    protected final Context mContext;
+    protected final Random mRng;
+    protected final ArrayList<Entity> mEntities;
 
     private long mTicks;
 
     public World(Context context) {
         mContext = context;
         mRng = new Random(mContext.getRngSeed());
-
         mEntities = new ArrayList<>();
     }
 
@@ -39,8 +37,6 @@ public class World {
     }
 
     public void render(GraphicsContext gfx) {
-        gfx.setFill(Color.grayRgb(64));
-        gfx.fillRect(0, 0, getWidth(), getHeight());
         mEntities.forEach(entity -> entity.render(gfx));
     }
 

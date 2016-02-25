@@ -1,6 +1,6 @@
 package net.popsim.src.fx.ui;
 
-import net.popsim.src.util.ScriptCompiler;
+import net.popsim.src.util.Compiler;
 import net.popsim.src.util.config.JsonConfigLoader;
 import net.popsim.src.util.io.HeadedPrintStream;
 import net.popsim.src.util.io.SplitPrintStream;
@@ -62,10 +62,10 @@ public class ContextHelper {
 
     public static void setupCompiler() throws Exception {
         try {
-            System.out.println("Initializing ScriptCompiler");
-            ScriptCompiler.init();
+            System.out.println("Initializing Compiler");
+            Compiler.init();
         } catch (Exception e) {
-            throw new Exception("Unable to initialize ScriptCompiler", e);
+            throw new Exception("Unable to initialize Compiler", e);
         }
     }
 
@@ -109,5 +109,9 @@ public class ContextHelper {
                 result.add((A) value);
         }
         return result;
+    }
+
+    public static File packageToFile(String pack) {
+        return new File(DIR_HOME, pack.replace('.', File.separatorChar) + ".java");
     }
 }
