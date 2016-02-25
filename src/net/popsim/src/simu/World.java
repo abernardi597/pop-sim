@@ -8,13 +8,15 @@ import java.util.Random;
 
 public class World {
 
+    protected final Simulation mSimulation;
     protected final Context mContext;
     protected final Random mRng;
     protected final ArrayList<Entity> mEntities;
 
     private long mTicks;
 
-    public World(Context context) {
+    public World(Simulation simulation, Context context) {
+        mSimulation = simulation;
         mContext = context;
         mRng = new Random(mContext.getRngSeed());
         mEntities = new ArrayList<>();

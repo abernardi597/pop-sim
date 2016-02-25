@@ -1,14 +1,12 @@
 package net.popsim.src.simu;
 
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.input.KeyEvent;
 import net.popsim.src.fx.ui.Context;
 
 import java.util.concurrent.*;
 
-public class Simulation implements EventHandler<KeyEvent> {
+public class Simulation {
 
     private final Context mContext;
     private final World mWorld;
@@ -20,9 +18,8 @@ public class Simulation implements EventHandler<KeyEvent> {
 
     public Simulation(Context context) throws Exception {
         mContext = context;
-        mWorld = mContext.getWorldClass().getConstructor(Context.class).newInstance(mContext);
+        mWorld = mContext.getWorldClass().getConstructor(Simulation.class, Context.class).newInstance(this, mContext);
         mCanvas = new Canvas(mWorld.getWidth(), mWorld.getHeight());
-        mCanvas.setOnKeyTyped(this);
         mCanvas.setFocusTraversable(true);
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, r -> {
             Thread t = new Thread(r);
@@ -57,19 +54,6 @@ public class Simulation implements EventHandler<KeyEvent> {
         }
         // Finalize the update, setting current positions to future ones
         mWorld.postUpdate();
-    }
-
-    @Override
-    public void handle(KeyEvent event) {
-        switch (event.getCharacter()) {
-            case "p":
-                if (isPaused())
-                    resume();
-                else
-                    pause();
-            default:
-                System.out.println("Typed: " + event.getCharacter());
-        }
     }
 
     public void begin() {
