@@ -3,8 +3,7 @@ package net.popsim.src.simu;
 import javafx.scene.canvas.GraphicsContext;
 import net.popsim.src.fx.ui.Context;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class World {
 
@@ -13,6 +12,7 @@ public class World {
     protected final Random mRng;
     protected final ArrayList<Entity> mEntities;
 
+    private List<Entity> mUnmoddableEntities;
     private long mTicks;
 
     public World(Simulation simulation, Context context) {
@@ -27,19 +27,23 @@ public class World {
         System.out.printf("seed: %d\n", mContext.getRngSeed());
     }
 
-    public void preUpdate() {}
+    public void preUpdate() {
+        ArrayList<Entity> temp = new ArrayList<>(mEntities.size());
+        temp.addAll(mEntities);
+        mUnmoddableEntities = Collections.unmodifiableList(temp);
+    }
 
     public void update() {
-        mEntities.parallelStream().forEach(Entity::update);
+        getEntities().parallelStream().forEach(Entity::update);
         mTicks++;
     }
 
     public void postUpdate() {
-        mEntities.parallelStream().forEach(Entity::finish);
+        getEntities().parallelStream().forEach(Entity::finish);
     }
 
     public void render(GraphicsContext gfx) {
-        mEntities.forEach(entity -> entity.render(gfx));
+        getEntities().forEach(entity -> entity.render(gfx));
     }
 
     public long getNewRandomSeed() {
@@ -56,6 +60,10 @@ public class World {
 
     public int getHeight() {
         return mContext.getWorldHeight();
+    }
+
+    public List<Entity> getEntities() {
+        return mUnmoddableEntities;
     }
 
     public long getTicks() {
