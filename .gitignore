@@ -1,7 +1,4 @@
 /.idea
 /log
 /out
-/scripts
-/test
-*.config
 *.iml
