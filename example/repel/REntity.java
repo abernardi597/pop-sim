@@ -16,10 +16,9 @@ public class REntity extends PositionEntity {
     private double mTimestep;
 
     public REntity(World world) {
-        super(world, 3, Color.WHITE);
+        super(world, 1.5, Color.WHITE);
         mA = new Vector();
         mTimestep = 1D / mWorld.getContext().getTickFrequency();
-        mSize = 3;
     }
 
     @Override
