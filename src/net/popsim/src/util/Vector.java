@@ -145,6 +145,30 @@ public class Vector implements Cloneable {
         return mX * other.mX + mY * other.mY;
     }
 
+    /**
+     * Projects this vector onto another one.
+     *
+     * @param other  the vector to project onto
+     * @param result the vector in which to store the projected vector
+     *
+     * @return The resulting vector
+     */
+    public Vector proj(Vector other, Vector result) {
+        double d = dot(other) / other.squareMag();
+        return other.multiply(d, result);
+    }
+
+    /**
+     * Computes the scalar projection of this vector onto another one.
+     *
+     * @param other the vector to project onto
+     *
+     * @return The length of the vector projection.
+     */
+    public double comp(Vector other) {
+        return dot(other) / other.mag();
+    }
+
     @Override
     public Vector clone() {
         return new Vector(mX, mY);
