@@ -3,9 +3,7 @@ package net.popsim.src.fx.launcher;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.*;
-import net.popsim.src.fx.ui.Context;
-import net.popsim.src.fx.ui.ContextHelper;
-import net.popsim.src.simu.Simulation;
+import net.popsim.src.simu.*;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package net.popsim.src.fx.ui;
+package net.popsim.src.simu;
 
 import net.popsim.src.util.Compiler;
 import net.popsim.src.util.config.JsonConfigLoader;

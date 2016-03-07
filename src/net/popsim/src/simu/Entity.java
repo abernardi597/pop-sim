@@ -1,7 +1,6 @@
 package net.popsim.src.simu;
 
 import javafx.scene.canvas.GraphicsContext;
-import net.popsim.src.fx.ui.Context;
 
 import java.util.Random;
 

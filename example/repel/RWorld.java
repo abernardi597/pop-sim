@@ -3,9 +3,7 @@ package example.repel;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
-import net.popsim.src.fx.ui.Context;
-import net.popsim.src.simu.Simulation;
-import net.popsim.src.simu.World;
+import net.popsim.src.simu.*;
 
 public class RWorld extends World {
 

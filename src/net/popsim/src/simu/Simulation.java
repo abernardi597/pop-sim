@@ -2,7 +2,6 @@ package net.popsim.src.simu;
 
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
-import net.popsim.src.fx.ui.Context;
 
 import java.util.concurrent.*;
 

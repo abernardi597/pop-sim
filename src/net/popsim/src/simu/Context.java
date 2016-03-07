@@ -1,8 +1,7 @@
-package net.popsim.src.fx.ui;
+package net.popsim.src.simu;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.popsim.src.simu.World;
 import net.popsim.src.util.Compiler;
 import net.popsim.src.util.config.JsonConfigLoader;
 
@@ -32,17 +31,12 @@ public class Context implements JsonConfigLoader.Target {
     private String mWorldClassName;
     private Class<? extends World> mWorldClass;
 
-    @Expose
-    @SerializedName("Entity classes")
-    private String[] mEntityClassNames;
-
     public Context() {
         // Default values
         mTickFrequency = 60; // 60 Hz
         mRandomSeedString = "";
         mWorldSize = new int[] {100, 100};
         mWorldClassName = World.class.getName();
-        mEntityClassNames = new String[0];
     }
 
     @Override
@@ -61,9 +55,6 @@ public class Context implements JsonConfigLoader.Target {
         File src = ContextHelper.packageToFile(mWorldClassName);
         if (src.exists()) // If there is a compilation target, try to compile it
             toCompile.add(new Compiler.FileSource(src, mWorldClassName));
-        // Entity classes
-        for (String n : mEntityClassNames)
-            toCompile.add(new Compiler.FileSource(ContextHelper.packageToFile(n), n));
         // Compile everything, if anything
         if (toCompile.size() > 0)
             Compiler.compile(toCompile);
