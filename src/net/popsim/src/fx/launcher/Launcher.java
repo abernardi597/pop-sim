@@ -14,8 +14,7 @@ import javafx.stage.StageStyle;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Launcher extends Application {
 
@@ -80,10 +79,10 @@ public class Launcher extends Application {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
+        System.out.println("Stopping");
         mTarget.doFinish();
         mTarget.awaitFinish();
-        System.out.println("Stopping");
         System.exit(0);
     }
 
@@ -115,14 +114,14 @@ public class Launcher extends Application {
     }
 
     private void showErrorStage(Throwable th) {
-        Platform.setImplicitExit(false);
+        System.out.println("show error");
         mStage.hide();
         Stage s = new Stage();
         s.setTitle("Exception");
         s.setScene(makeErrorUi(th));
         s.toFront();
+        System.out.println("Show and wait");
         s.showAndWait();
-        Platform.setImplicitExit(true);
     }
 
     private void initTarget() {
@@ -133,7 +132,8 @@ public class Launcher extends Application {
                 mTarget.awaitInit();
                 Platform.runLater(this::runTarget);
             } catch (Exception e) {
-                handle(e);
+                handle(e, true);
+                stop();
             }
         });
     }
@@ -147,16 +147,25 @@ public class Launcher extends Application {
             try {
                 mTarget.awaitMain();
             } catch (Exception e) {
-                handle(e);
+                handle(e, true);
             } finally {
-                Platform.setImplicitExit(true);
+                stop();
             }
         });
     }
 
-    private void handle(Throwable th) {
+    private void handle(Throwable th, boolean wait) {
         System.err.println("An error has occurred");
+        CountDownLatch latch = wait? new CountDownLatch(1) : null;
         th.printStackTrace();
-        Platform.runLater(() -> showErrorStage(th));
+        Platform.runLater(() -> {
+            showErrorStage(th);
+            if (wait)
+                latch.countDown();
+        });
+        if (wait) try {
+            latch.await();
+        } catch (InterruptedException e) {
+        } // Oops, but we can't help it
     }
 }

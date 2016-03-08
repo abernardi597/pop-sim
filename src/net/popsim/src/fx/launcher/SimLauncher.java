@@ -51,8 +51,12 @@ public class SimLauncher extends Target {
             Scene s = new Scene(root);
             stage.setScene(s);
             stage.show();
+            stage.setOnCloseRequest(event -> {
+                stage.hide();
+                mSimulation.signalShutdown();
+            });
         });
-        mSimulation.begin();
+        mSimulation.run();
     }
 
     @Override
