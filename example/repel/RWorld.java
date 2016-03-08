@@ -16,7 +16,7 @@ public class RWorld extends World {
         for (int i = 0; i < 1024; i++) {
             REntity ne = new REntity(this);
             ne.setPosition(getWidth() / 2, getHeight() / 2);
-            mEntities.add(ne);
+            spawnEntity(ne);
         }
         System.out.println("hi - from A");
         mSimulation.getCanvas().setOnKeyTyped(this::handle);
@@ -47,7 +47,7 @@ public class RWorld extends World {
         if (event.getButton() == MouseButton.PRIMARY) {
             REntity ne = new REntity(this);
             ne.setPosition(event.getX(), event.getY());
-            mEntities.add(ne);
+            spawnEntity(ne);
             System.out.println(mEntities.size());
         }
     }

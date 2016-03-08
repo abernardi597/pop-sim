@@ -3,22 +3,29 @@ package net.popsim.src.simu;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class World {
+
+    private static <T> List<T> makeUnmodifiableCopy(List<T> list) {
+        List<T> temp = new ArrayList<>(list.size());
+        temp.addAll(list);
+        return Collections.unmodifiableList(temp);
+    }
 
     protected final Simulation mSimulation;
     protected final Context mContext;
     protected final Random mRng;
     protected final ArrayList<Entity> mEntities;
 
-    private List<Entity> mUnmoddableEntities;
+    private List<Entity> mEntityFreeze;
     private long mTicks;
 
     public World(Simulation simulation, Context context) {
         mSimulation = simulation;
         mContext = context;
         mRng = new Random(mContext.getRngSeed());
-        mEntities = new ArrayList<>();
+        mEntityFreeze = makeUnmodifiableCopy(mEntities = new ArrayList<>());
     }
 
     public void init() {
@@ -27,22 +34,20 @@ public class World {
     }
 
     public void preUpdate() {
-        ArrayList<Entity> temp = new ArrayList<>(mEntities.size());
-        temp.addAll(mEntities);
-        mUnmoddableEntities = Collections.unmodifiableList(temp);
+        mEntityFreeze = makeUnmodifiableCopy(mEntities);
     }
 
     public void update() {
-        getEntities().parallelStream().forEach(Entity::update);
+        forEachEntityParallel(Entity::update);
         mTicks++;
     }
 
     public void postUpdate() {
-        getEntities().parallelStream().forEach(Entity::finish);
+        forEachEntityParallel(Entity::finish);
     }
 
     public void render(GraphicsContext gfx) {
-        getEntities().forEach(entity -> entity.render(gfx));
+        forEachEntity(entity -> entity.render(gfx));
     }
 
     public long getNewRandomSeed() {
@@ -61,8 +66,37 @@ public class World {
         return mContext.getWorldHeight();
     }
 
-    public List<Entity> getEntities() {
-        return mUnmoddableEntities;
+    public synchronized void spawnEntity(Entity e) {
+        if (e == null)
+            throw new IllegalArgumentException("Cannot spawn null entity");
+        else mEntities.add(e);
+    }
+
+    public synchronized void killEntity(Entity e) {
+        mEntities.remove(e);
+    }
+
+    public Iterator<Entity> getEntityIterator() {
+        return getEntityIterator(0);
+    }
+
+    public Iterator<Entity> getEntityIterator(Entity start) {
+        int index = mEntityFreeze.indexOf(start);
+        if (index < 0 || index >= mEntityFreeze.size())
+            throw new IllegalArgumentException("Entity is not in the entity freeze");
+        return getEntityIterator(index + 1);
+    }
+
+    public Iterator<Entity> getEntityIterator(int start) {
+        return mEntityFreeze.listIterator(start);
+    }
+
+    public void forEachEntity(Consumer<? super Entity> action) {
+        mEntityFreeze.forEach(action);
+    }
+
+    public void forEachEntityParallel(Consumer<? super Entity> action) {
+        mEntityFreeze.parallelStream().forEach(action);
     }
 
     public long getTicks() {

@@ -6,6 +6,8 @@ import net.popsim.src.simu.Entity;
 import net.popsim.src.simu.World;
 import net.popsim.src.util.Vector;
 
+import java.util.Iterator;
+
 public class REntity extends PositionEntity {
 
     public static final double DAMP = 0.99;
@@ -24,7 +26,9 @@ public class REntity extends PositionEntity {
     @Override
     public void update() {
         Vector p = new Vector();
-        for (Entity e : mWorld.getEntities()) {
+        Iterator<Entity> it = mWorld.getEntityIterator();
+        while (it.hasNext()) {
+            Entity e = it.next();
             if (e instanceof REntity && e != this) {
                 REntity me = (REntity) e;
                 Vector diff = mCurrentPosition.subtract(me.mCurrentPosition, new Vector());
