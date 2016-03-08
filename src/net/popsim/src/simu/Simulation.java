@@ -2,10 +2,11 @@ package net.popsim.src.simu;
 
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
+import net.popsim.src.util.ExceptionalRunnable;
 
 import java.util.concurrent.*;
 
-public class Simulation {
+public class Simulation implements ExceptionalRunnable {
 
     private final Context mContext;
     private final World mWorld;
@@ -13,7 +14,8 @@ public class Simulation {
     private final ScheduledExecutorService mTickScheduler;
 
     private ScheduledFuture mFutureTick;
-    private boolean hasBegun;
+    private CountDownLatch mFinishLatch;
+    private Exception mException;
 
     public Simulation(Context context) throws Exception {
         mContext = context;
@@ -34,33 +36,51 @@ public class Simulation {
     }
 
     public void tick() {
-        // Get the world ready for an update
-        mWorld.preUpdate();
-        CountDownLatch finalizeLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            mWorld.render(mCanvas.getGraphicsContext2D());
-            // Let the update finalize
-            finalizeLatch.countDown();
-        });
-        // Update while rendering
-        mWorld.update();
         try {
-            // Wait for the render to be complete before we finalize the update
-            finalizeLatch.await();
-        } catch (InterruptedException e) {
-            System.err.println("Interrupted: tossing update tick");
-            return;
+            // Get the world ready for an update
+            mWorld.preUpdate();
+            CountDownLatch finalizeLatch = new CountDownLatch(1);
+            Platform.runLater(() -> {
+                mWorld.render(mCanvas.getGraphicsContext2D());
+                // Let the update finalize
+                finalizeLatch.countDown();
+            });
+            // Update while rendering
+            mWorld.update();
+            try {
+                // Wait for the render to be complete before we finalize the update
+                finalizeLatch.await();
+            } catch (InterruptedException e) {
+                System.err.println("Interrupted: tossing update tick");
+                return;
+            }
+            // Finalize the update, setting current positions to future ones
+            mWorld.postUpdate();
+        } catch (Exception e) {
+            mException = new Exception("Exception during simulation tick", e);
+            mFinishLatch.countDown();
         }
-        // Finalize the update, setting current positions to future ones
-        mWorld.postUpdate();
     }
 
-    public void begin() {
-        if (hasBegun) {
+    @Override
+    public void run() throws Exception {
+        begin();
+        try {
+            mFinishLatch.await();
+        } catch (InterruptedException e) {
+            throw new Exception("Interrupted while awaiting termination", e);
+        }
+        if (mException != null)
+            throw mException;
+        shutdown();
+    }
+
+    public void begin() throws Exception {
+        if (mFinishLatch != null) {
             System.err.println("Simulation has already begun");
             return;
         }
-        hasBegun = true;
+        mFinishLatch = new CountDownLatch(1);
         System.out.printf("Beginning simulation @ %dHz\n", mContext.getTickFrequency());
         mWorld.init();
         resume();
@@ -81,8 +101,15 @@ public class Simulation {
         return mFutureTick == null;
     }
 
+    public void signalShutdown() {
+        if (mFinishLatch == null)
+            throw new IllegalStateException("Simulation has not started");
+        else mFinishLatch.countDown();
+    }
+
     public void shutdown() {
         pause();
+        signalShutdown();
         mTickScheduler.shutdown();
     }
 }
