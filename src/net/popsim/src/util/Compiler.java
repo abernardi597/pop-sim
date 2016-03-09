@@ -11,18 +11,15 @@ public class Compiler {
     private static JavaCompiler COMPILER;
     private static File DIR_OUTPUT;
 
-    public static void makeTempDirs(File f) throws IOException {
-        Stack<File> toMake = new Stack<>();
-        while (!f.exists()) {
-            toMake.push(f);
-            f = f.getParentFile();
-        }
-        while (!toMake.isEmpty()) {
-            f = toMake.pop();
-            if (!f.mkdir())
-                throw new IOException("Unable to create directory: " + f.getAbsolutePath());
-            f.deleteOnExit();
-        }
+    public static Stack<File> stackSubFiles(File parent, Stack<File> results) {
+        File[] contents = parent.listFiles();
+        if (contents != null)
+            for (File f : contents) {
+                if (f != null && f.isDirectory())
+                    stackSubFiles(f, results);
+                results.push(f);
+            }
+        return results;
     }
 
     public static void init() throws Exception {
@@ -44,14 +41,15 @@ public class Compiler {
 
     public static void compile(List<FileSource> sources) throws Exception {
         // Prepare each file for compilation
+        Stack<File> original;
+        stackSubFiles(DIR_OUTPUT, original = new Stack<>());
+        System.out.println("Cleaning output dir");
         for (FileSource src : sources) {
             File dest = src.getCompiledLocation(DIR_OUTPUT);
-            if (!dest.exists()) {
-                // Make the compilation directory temporary, so it doesn't linger
-                makeTempDirs(dest.getParentFile());
-            }
-            else if (!dest.delete())
-                throw new IOException("Unable to delete file: " + dest);
+            if (dest.exists())
+                if (!dest.delete())
+                    throw new IOException("Unable to delete file: " + dest);
+                else System.out.println("Deleted " + dest);
         }
         List<String> args = new ArrayList<>();
         // Create classpath
@@ -66,12 +64,22 @@ public class Compiler {
         args.add("-classpath");
         args.add(cp.toString());
         // Output for compiler
+        System.out.println("Compiling classes:");
+        for (FileSource f : sources)
+            System.out.println("  " + f.getClassName());
         StringWriter out = new StringWriter();
         if (!COMPILER.getTask(out, null, null, args, null, sources).call())
             throw new Exception(String.format("Unable to compile classes: %s\n%s", sources, out.toString().trim()));
-        // Cleanup after runtime terminates
-        for (FileSource src : sources)
-            src.getCompiledLocation(DIR_OUTPUT).deleteOnExit();
+        // Calculate diff
+        Stack<File> diff;
+        (diff = stackSubFiles(DIR_OUTPUT, new Stack<>())).removeAll(original);
+        // Mark for deletion
+        System.out.println("Compilation output: " + DIR_OUTPUT);
+        while (!diff.isEmpty()) {
+            String path = diff.peek().getAbsolutePath();
+            System.out.println("  " + path.substring(DIR_OUTPUT.getAbsolutePath().length()));
+            diff.pop().deleteOnExit();
+        }
     }
 
     public static class FileSource extends SimpleJavaFileObject {
