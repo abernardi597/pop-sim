@@ -44,7 +44,7 @@ public class Simulation implements ExceptionalRunnable {
                 try {
                     mWorld.render(mCanvas.getGraphicsContext2D());
                 } catch (Exception e) {
-                    mException = new Exception("Exception during simulation render tick", e);
+                    mException = new Exception ("Exception during simulation render tick", e);
                 }
                 // Let the update finalize
                 finalizeLatch.countDown();
