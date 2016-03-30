@@ -41,7 +41,11 @@ public class Simulation implements ExceptionalRunnable {
             mWorld.preUpdate();
             CountDownLatch finalizeLatch = new CountDownLatch(1);
             Platform.runLater(() -> {
-                mWorld.render(mCanvas.getGraphicsContext2D());
+                try {
+                    mWorld.render(mCanvas.getGraphicsContext2D());
+                } catch (Exception e) {
+                    mException = new Exception("Exception during simulation render tick", e);
+                }
                 // Let the update finalize
                 finalizeLatch.countDown();
             });
@@ -54,12 +58,14 @@ public class Simulation implements ExceptionalRunnable {
                 System.err.println("Interrupted: tossing update tick");
                 return;
             }
-            // Finalize the update, setting current positions to future ones
-            mWorld.postUpdate();
+            // Finalize the update if everything goes smoothly
+            if (mException == null)
+                mWorld.postUpdate();
         } catch (Exception e) {
-            mException = new Exception("Exception during simulation tick", e);
-            mFinishLatch.countDown();
+            mException = new Exception("Exception during simulation update tick", e);
         }
+        if (mException != null)
+            signalShutdown();
     }
 
     @Override
